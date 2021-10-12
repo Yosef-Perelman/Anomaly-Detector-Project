@@ -1,22 +1,31 @@
 //
-// Created by ariel on 11-Oct-21.
+// Created by ariel on 12-Oct-21.
 //
 
+#include "anomaly_detection_util.h"
 #include "anomaly_detection_util.h"
 #include <cmath>
 
 float anomaly_detection_util::dev(anomaly_detection_util::Point p, anomaly_detection_util::Point **points, int size) {
-    return 0;
+    Line l = linear_reg(points, size);
+    return dev(p, l);
 }
 
 anomaly_detection_util::Line anomaly_detection_util::linear_reg(anomaly_detection_util::Point **points, int size) {
-    float [size]
-    double a = points[0]->x;
-    return anomaly_detection_util::Line();
+    float* xVal = new float [size];
+    float* yVal = new float [size];
+
+    for (int i = 0; i < size; ++i) {
+        xVal[i] = points[i]->x;
+        yVal[i] = points[i]->y;
+    }
+    double a = cov(xVal, yVal, size) / var(xVal, size);
+    double b = mean(yVal, size) - a * mean(xVal, size);
+    return anomaly_detection_util::Line(a, b);
 }
 
 float anomaly_detection_util::dev(anomaly_detection_util::Point p, anomaly_detection_util::Line l) {
-    return 0;
+    return std::fabs(p.x - l.f(p.x));
 }
 
 float anomaly_detection_util::pearson(float *x, float *y, int size) {

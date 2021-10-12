@@ -1,9 +1,9 @@
 //
-// Created by ariel on 11-Oct-21.
+// Created by ariel on 12-Oct-21.
 //
 
-#ifndef ANOMALY_DETECTION_UTIL_ANOMALY_DETECTION_UTIL_H
-#define ANOMALY_DETECTION_UTIL_ANOMALY_DETECTION_UTIL_H
+#ifndef ANOMALY_DETECTOR_ANOMALY_DETECTION_UTIL_H
+#define ANOMALY_DETECTOR_ANOMALY_DETECTION_UTIL_H
 
 
 class anomaly_detection_util {
@@ -38,4 +38,4 @@ class anomaly_detection_util {
 };
 
 
-#endif //ANOMALY_DETECTION_UTIL_ANOMALY_DETECTION_UTIL_H
+#endif //ANOMALY_DETECTOR_ANOMALY_DETECTION_UTIL_H
