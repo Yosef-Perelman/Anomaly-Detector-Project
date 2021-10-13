@@ -1,59 +1,67 @@
-//
-// Created by ariel on 12-Oct-21.
-//
+/*
+ * anomaly_detection_util.cpp
+ *
+ * Author: Yosef Perelman 206344814
+ */
 
-#include "anomaly_detection_util.h"
-#include "anomaly_detection_util.h"
 #include <cmath>
+#include "anomaly_detection_util.h"
 
-float anomaly_detection_util::dev(anomaly_detection_util::Point p, anomaly_detection_util::Point **points, int size) {
+float avg(float* x, int size){
+    float avg = 0;
+    for (int i = 0; i < size; i++) {
+        avg += x[i];
+    }
+    return avg / size;;
+}
+
+// returns the variance of X and Y
+float var(float* x, int size){
+    float avg1 = 0;
+    for (int i = 0; i < size; i++) {
+        avg1 += pow(x[i], 2.0);
+    }
+    avg1 = avg1  / size;
+    return avg1 - pow(avg(x, size), 2.0);
+}
+
+// returns the covariance of X and Y
+float cov(float* x, float* y, int size){
+    float avg1 = 0;
+    for (int i = 0; i < size; i++) {
+        avg1 += (x[i] * y[i]);
+    }
+    avg1 = avg1  / size;
+    return avg1 - (avg(x, size) * avg(y, size));
+}
+
+// returns the Pearson correlation coefficient of X and Y
+float pearson(float* x, float* y, int size){
+    return cov(x, y, size) / (sqrt(var(x, size)) * sqrt(var(y, size)));
+}
+
+// performs a linear regression and returns the line equation
+Line linear_reg(Point** points, int size){
+    float x[size];
+    float y[size];
+    for (int i = 0; i < size; i++)
+    {
+        x[i] = points[i]->x;
+        y[i] = points[i]->y;
+    }
+    return Line(cov(x, y, size) / var(x, size), avg(y, size) - (cov(x, y, size) / var(x, size) * avg(x, size)));
+}
+
+// returns the deviation between point p and the line equation of the points
+float dev(Point p, Point** points, int size){
     Line l = linear_reg(points, size);
-    return dev(p, l);
+    return std::abs((p.x * l.a + l.b) - p.y);
 }
 
-anomaly_detection_util::Line anomaly_detection_util::linear_reg(anomaly_detection_util::Point **points, int size) {
-    float* xVal = new float [size];
-    float* yVal = new float [size];
-
-    for (int i = 0; i < size; ++i) {
-        xVal[i] = points[i]->x;
-        yVal[i] = points[i]->y;
-    }
-    double a = cov(xVal, yVal, size) / var(xVal, size);
-    double b = mean(yVal, size) - a * mean(xVal, size);
-    return anomaly_detection_util::Line(a, b);
+// returns the deviation between point p and the line
+float dev(Point p, Line l){
+    return std::abs((p.x * l.a + l.b) - p.y);
 }
 
-float anomaly_detection_util::dev(anomaly_detection_util::Point p, anomaly_detection_util::Line l) {
-    return std::fabs(p.x - l.f(p.x));
-}
 
-float anomaly_detection_util::pearson(float *x, float *y, int size) {
-    return cov(x,y,size) / (sqrt(var(x, size)) * sqrt(var(y, size)));
-}
 
-float anomaly_detection_util::cov(float *x, float *y, int size) {
-    float xMean = mean(x, size); float yMean = mean(y, size);
-    float sum = 0;
-    for (int i = 0; i < size; ++i) {
-        sum += (x[i] - xMean) * (y[i] - yMean);
-    }
-    return sum / size;
-}
-
-float anomaly_detection_util::var(float *x, int size) {
-    float average = mean(x, size);
-    float sum = 0;
-    for (int i = 0; i < size; ++i) {
-        sum += pow(x[i] - average, 2);
-    }
-    return sum/size;
-}
-
-float anomaly_detection_util::mean(float *x, int size) {
-    float sum = 0;
-    for (int i = 0; i < size; ++i) {
-        sum += x[i];
-    }
-    return sum/size;
-}
