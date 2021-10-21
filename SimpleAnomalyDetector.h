@@ -1,4 +1,3 @@
-
 #ifndef SIMPLEANOMALYDETECTOR_H_
 #define SIMPLEANOMALYDETECTOR_H_
 
@@ -32,4 +31,5 @@ public:
 
 };
 
+#endif
 
