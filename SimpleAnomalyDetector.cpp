@@ -67,10 +67,13 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                 corrfea.lin_reg = linear_reg(pointsArr, dataSize);
                 corrfea.threshold = 0;
                 for (int j = 0; j < dataSize; ++j) {
-                    if (abs(dev(pointsArr[0][j], corrfea.lin_reg)) > corrfea.threshold){
-                        corrfea.threshold = abs(dev(pointsArr[0][j], corrfea.lin_reg));
+                    if (dev(*pointsArr[j], corrfea.lin_reg) > corrfea.threshold) {
+                        corrfea.threshold = dev(*pointsArr[j], corrfea.lin_reg);
                     }
-                }
+                        if(dev(*pointsArr[j], corrfea.lin_reg) > 1){
+                            int xc = dev(*pointsArr[j], corrfea.lin_reg);
+                        }
+                    }
                 cf.push_back(corrfea);
                 for (int j = 0; j < dataSize; ++j) {
                     delete pointsArr[j];
