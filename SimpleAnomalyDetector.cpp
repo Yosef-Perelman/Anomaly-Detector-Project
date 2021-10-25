@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "SimpleAnomalyDetector.h"
 
-const float treshHold = 0.9;
+const float threshHold = 0.9;
 
 SimpleAnomalyDetector::SimpleAnomalyDetector() {
     // TODO Auto-generated constructor stub
@@ -53,7 +53,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
             }
         }
         if (c != -1) {
-            if (correlation > treshHold) {
+            if (correlation > threshHold) {
                 copy(ts.dataMap.find(feature2Name)->second.begin(), ts.dataMap.find(feature2Name)->second.end(),
                      infoArr2);
                 Point* pointsArr[dataSize];
@@ -70,21 +70,19 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                     if (dev(*pointsArr[j], corrfea.lin_reg) > corrfea.threshold) {
                         corrfea.threshold = dev(*pointsArr[j], corrfea.lin_reg);
                     }
-                        if(dev(*pointsArr[j], corrfea.lin_reg) > 1){
-                            int xc = dev(*pointsArr[j], corrfea.lin_reg);
-                        }
-                    }
+                }
                 cf.push_back(corrfea);
                 for (int j = 0; j < dataSize; ++j) {
                     delete pointsArr[j];
                 }
-                //delete pointsArr[0];
+
             }
         }
     }
 }
 
 vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts){
+
     // TODO Auto-generated destructor stub
 }
 

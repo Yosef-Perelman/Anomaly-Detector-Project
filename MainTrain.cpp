@@ -51,7 +51,7 @@ void checkCorrelationTrain(correlatedFeatures c,string f1, string f2, float a, f
             if(c.lin_reg.b<b-0.5f || c.lin_reg.b>b+0.5f)
                 cout<<f1<<"-"<<f2<<" wrong value of line_reg.b (-5)"<<endl;
             if(c.threshold>0.3)
-            cout<<f1<<"-"<<f2<<" wrong threshold detected (-5)"<<endl;
+                cout<<f1<<"-"<<f2<<" wrong threshold detected (-5)"<<endl;
         }
     }
 
