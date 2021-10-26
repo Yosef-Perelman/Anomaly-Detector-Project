@@ -75,14 +75,38 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                 for (int j = 0; j < dataSize; ++j) {
                     delete pointsArr[j];
                 }
-
             }
         }
     }
 }
 
 vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts){
-
+    //detecting the names of the columns from the correlatedFeatures.
+    vector<string> featuresNames = ts.getFeaturesName();
+    string feature1Name, feature2Name;
+    int colNum = ts.getColNum(), dataSize = ts.getLineNum();
+    float infoArr1[dataSize], infoArr2[dataSize], temp[dataSize];
+    // iter through cf.
+    for (int i = 0; i < this->cf.size(); i++) {
+        // get the col names.
+        for (int j = 0; j < colNum - 1; ++j) {
+            if (this->cf[i].feature1.compare(featuresNames[j])) {
+                feature1Name = this->cf[i].feature1;
+            } else if (this->cf[i].feature2.compare(featuresNames[j])) {
+                feature2Name = this->cf[i].feature2;
+            }
+        }
+        copy(ts.dataMap.find(feature1Name)->second.begin(), ts.dataMap.find(feature1Name)->second.end(), infoArr1);
+        copy(ts.dataMap.find(feature2Name)->second.begin(), ts.dataMap.find(feature2Name)->second.end(), infoArr2);
+        for (int k = 0; k < dataSize; ++k) {
+            Point* p = new Point(infoArr1[k], infoArr2[k]);
+            if (dev(*p, this->cf[i].lin_reg) > this->cf[i].threshold * 1.1){
+                AnomalyReport anomalyReport(feature1Name + "-" + feature2Name, k + 1);
+                ar.push_back(anomalyReport);
+            }
+        }
+        return ar;
+    }
     // TODO Auto-generated destructor stub
 }
 
