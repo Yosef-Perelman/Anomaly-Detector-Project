@@ -1,8 +1,9 @@
-#include <string>
-#include <string.h>
-#include <map>
-#include <vector>
-#include <algorithm>
+/*
+ * anomaly_detection_util.cpp
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
+
 #include "SimpleAnomalyDetector.h"
 
 const float threshHold = 0.9;
@@ -16,20 +17,6 @@ SimpleAnomalyDetector::~SimpleAnomalyDetector() {
     // TODO Auto-generated destructor stub
 }
 
-//Get vector of floats and extract the info into array
-void vecToArr(float* arr, vector<float> vec){
-
-}
-
-//Get two arrays and create 2D array of Points
-/*Point** createPointsArray(float* arr1, float* arr2, int size){
-    Point* pointsArray[size];
-    for (int i = 0; i < size; ++i) {
-        pointsArray[i] = new Point(arr1[i], arr2[i]);
-    }
-    return pointsArray;
-}*/
-
 void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
     //Vector with the features names
     vector<string> featuresNames = ts.getFeaturesName();
@@ -38,7 +25,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
     // TODO initial the arrays dynamically
     float infoArr1[dataSize], infoArr2[dataSize], temp[dataSize];
     //Move on all the feature except the last
-    for (int i = 0; i < colNum - 1; ++i) {
+    for (int i = 0; i < colNum; ++i) {
         int c = -1;
         float correlation = 0;
         feature1Name = featuresNames[i];
@@ -46,8 +33,8 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
         for (int j = i + 1; j < colNum; ++j) {
             string tempName = featuresNames[j];
             copy(ts.dataMap.find(tempName)->second.begin(), ts.dataMap.find(tempName)->second.end(), temp);
-            if (fabs(pearson(infoArr1, temp, dataSize)) > correlation) {
-                correlation = fabs(pearson(infoArr1, temp, dataSize));
+            if (std::abs(pearson(infoArr1, temp, dataSize)) > correlation) {
+                correlation = std::abs(pearson(infoArr1, temp, dataSize));
                 feature2Name = tempName;
                 c = j;
             }
@@ -63,7 +50,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                 correlatedFeatures corrfea;
                 corrfea.feature1 = feature1Name;
                 corrfea.feature2 = feature2Name;
-                corrfea.corrlation = fabs(pearson(infoArr1, infoArr2, dataSize));
+                corrfea.corrlation = std::abs(pearson(infoArr1, infoArr2, dataSize));
                 corrfea.lin_reg = linear_reg(pointsArr, dataSize);
                 corrfea.threshold = 0;
                 for (int j = 0; j < dataSize; ++j) {
@@ -81,32 +68,15 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
 }
 
 vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts){
-    //detecting the names of the columns from the correlatedFeatures.
-    vector<string> featuresNames = ts.getFeaturesName();
-    string feature1Name, feature2Name;
-    int colNum = ts.getColNum(), dataSize = ts.getLineNum();
-    float infoArr1[dataSize], infoArr2[dataSize], temp[dataSize];
-    // iter through cf.
-    for (int i = 0; i < this->cf.size(); i++) {
-        // get the col names.
-        for (int j = 0; j < colNum - 1; ++j) {
-            if (this->cf[i].feature1.compare(featuresNames[j])) {
-                feature1Name = this->cf[i].feature1;
-            } else if (this->cf[i].feature2.compare(featuresNames[j])) {
-                feature2Name = this->cf[i].feature2;
-            }
-        }
-        copy(ts.dataMap.find(feature1Name)->second.begin(), ts.dataMap.find(feature1Name)->second.end(), infoArr1);
-        copy(ts.dataMap.find(feature2Name)->second.begin(), ts.dataMap.find(feature2Name)->second.end(), infoArr2);
-        for (int k = 0; k < dataSize; ++k) {
-            Point* p = new Point(infoArr1[k], infoArr2[k]);
-            if (dev(*p, this->cf[i].lin_reg) > this->cf[i].threshold * 1.1){
-                AnomalyReport anomalyReport(feature1Name + "-" + feature2Name, k + 1);
+    int dataSize = ts.getLineNum();
+    for (int i = 0; i < cf.size(); ++i) {
+        for (int j = 0; j < dataSize; ++j) {
+            if (std::abs(ts.dataMap.find(cf[i].feature2)->second[j] - (ts.dataMap.find(cf[i].feature1)->second[j]
+            * cf[i].lin_reg.a + cf[i].lin_reg.b)) > (cf[i].threshold * 1.1)) {
+                AnomalyReport anomalyReport = AnomalyReport(cf[i].feature1+"-"+cf[i].feature2, j+1);
                 ar.push_back(anomalyReport);
             }
         }
-        return ar;
     }
-    // TODO Auto-generated destructor stub
+    return ar;
 }
-

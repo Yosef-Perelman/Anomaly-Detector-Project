@@ -1,21 +1,23 @@
+/*
+ * anomaly_detection_util.cpp
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
+
 #ifndef TIMESERIES_H_
 #define TIMESERIES_H_
 
-#include <iostream>
-#include <string>
 #include <fstream>
 #include <map>
 #include <vector>
-#include <utility>
-#include <stdexcept>
 #include <sstream>
 
 using namespace std;
 
 class TimeSeries{
 
-    vector<string> feaName;
-    int colNum = 0, lineNum;
+    vector<string> FeaturesNames;
+    int FeaturesNumber = 0, RowsNumber;
 
 public:
 
@@ -26,25 +28,22 @@ public:
         //Open the CSV file
         ifstream infoFile(CSVfileName);
 
-        //Check if the file opening succeed
-        if (!infoFile) {
-            cout << "The file isn't open" << std::endl;
-        }
-
         // Helper variables
         string feature, row;
         float num;
 
-        // Read the features name's row
+        // Get the names of the features
         getline(infoFile, row);
         stringstream namesRow(row);
         while (getline(namesRow, feature,',')){
-            colNum++;
-            feaName.push_back(feature);
+            FeaturesNumber++;
+            FeaturesNames.push_back(feature);
+            // Insert to the map pairs like <1.A feature name, 2.Empty vector that will contain the feature data>
             dataMap.insert(pair<string, vector<float>>(feature, vector<float>{}));
         }
 
-        //Read the data line by line
+        // Insert the data to the appropriate vector in the map
+        // Crawl over the file line by line and insert every number to the appropriate place
         map<string, vector<float>>::iterator itr = dataMap.begin();
         while (getline(infoFile, row)){
             stringstream infoRows(row);
@@ -55,33 +54,23 @@ public:
             }
             itr = dataMap.begin();
         }
-        lineNum = dataMap.begin()->second.size();
+        RowsNumber = dataMap.begin()->second.size();
         infoFile.close();
     }
 
-    //Get the row number
+    //Get the number of features
     const int getColNum() const{
-        return colNum;
+        return FeaturesNumber;
     }
 
-    //Get the line number
+    //Get the rows number that represent the size of the data
     const int getLineNum() const{
-        return lineNum;
+        return RowsNumber;
     }
-
-    /*//Get full information of feature
-    const pair<string, vector<float>> getFeaInfo(string key) const{
-        return pair<string, vector<float>>(dataMap.find(key)->first, dataMap.find(key)->second);
-    }
-
-    //Get values of feature
-    const vector<float> getFeaValues(string key) const{
-        return dataMap.find(key)->second;
-    }*/
 
     //Get vector of strings with all the features name's with "," to separate
     const vector<string>& getFeaturesName() const{
-        return feaName;
+        return FeaturesNames;
     }
 };
 
