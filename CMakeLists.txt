@@ -5,7 +5,8 @@ include(CTest)
 enable_testing()
 
 add_executable(Anomaly_Detector MainTrain.cpp anomaly_detection_util.cpp anomaly_detection_util.h SimpleAnomalyDetector.cpp
-        SimpleAnomalyDetector.h timeseries.cpp timeseries.h AnomalyDetector.h minCircle.cpp minCircle.h)
+        SimpleAnomalyDetector.h timeseries.cpp timeseries.h AnomalyDetector.h minCircle.cpp minCircle.h HybridAnomalyDetector.cpp
+        HybridAnomalyDetector.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

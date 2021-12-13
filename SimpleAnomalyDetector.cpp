@@ -5,8 +5,10 @@
  */
 
 #include "SimpleAnomalyDetector.h"
+//#include "HybridAnomalyDetector.h"
 
-const float threshHold = 0.9;
+const float highThreshHold = 0.9;
+const float lowThreshHold = 0.5;
 
 SimpleAnomalyDetector::SimpleAnomalyDetector() {
     // TODO Auto-generated constructor stub
@@ -40,7 +42,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
             }
         }
         if (c != -1) {
-            if (correlation > threshHold) {
+            if (correlation > lowThreshHold) {
                 copy(ts.dataMap.find(feature2Name)->second.begin(), ts.dataMap.find(feature2Name)->second.end(),
                      infoArr2);
                 Point* pointsArr[dataSize];
@@ -52,12 +54,14 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                 corrfea.feature2 = feature2Name;
                 corrfea.corrlation = std::abs(pearson(infoArr1, infoArr2, dataSize));
                 corrfea.lin_reg = linear_reg(pointsArr, dataSize);
-                corrfea.threshold = 0;
-                for (int j = 0; j < dataSize; ++j) {
+                // todo - create the setTreshHold
+                // new
+                setThreshHold(corrfea, pointsArr, dataSize);
+                /*for (int j = 0; j < dataSize; ++j) {
                     if (dev(*pointsArr[j], corrfea.lin_reg) > corrfea.threshold) {
                         corrfea.threshold = dev(*pointsArr[j], corrfea.lin_reg);
                     }
-                }
+                }*/
                 cf.push_back(corrfea);
                 for (int j = 0; j < dataSize; ++j) {
                     delete pointsArr[j];
@@ -71,8 +75,11 @@ vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts){
     int dataSize = ts.getLineNum();
     for (int i = 0; i < cf.size(); ++i) {
         for (int j = 0; j < dataSize; ++j) {
-            if (std::abs(ts.dataMap.find(cf[i].feature2)->second[j] - (ts.dataMap.find(cf[i].feature1)->second[j]
-            * cf[i].lin_reg.a + cf[i].lin_reg.b)) > (cf[i].threshold * 1.1)) {
+            // todo method to check if there annomaly according the line or the circle
+            // new
+            if (checkAnomaly(ts, cf[i], j))
+            /*if (std::abs(ts.dataMap.find(cf[i].feature2)->second[j] - (ts.dataMap.find(cf[i].feature1)->second[j]
+            * cf[i].lin_reg.a + cf[i].lin_reg.b)) > (cf[i].threshold * 1.1))*/ {
                 AnomalyReport anomalyReport = AnomalyReport(cf[i].feature1+"-"+cf[i].feature2, j+1);
                 ar.push_back(anomalyReport);
             }
