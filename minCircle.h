@@ -1,3 +1,8 @@
+/*
+ * minCircle.h
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
 
 #ifndef MINCIRCLE_H_
 #define MINCIRCLE_H_
@@ -7,6 +12,7 @@
 #include <cmath>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <algorithm>
 #include "anomaly_detection_util.h"
 
 using namespace std;

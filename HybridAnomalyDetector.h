@@ -1,4 +1,8 @@
-
+/*
+ * HybridAnomalyDetector.h
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
 
 #ifndef HYBRIDANOMALYDETECTOR_H_
 #define HYBRIDANOMALYDETECTOR_H_
@@ -13,8 +17,8 @@ public:
 	HybridAnomalyDetector();
 	virtual ~HybridAnomalyDetector();
 
-    virtual void setThreshHold(correlatedFeatures& corrfea, Point** pointsArr, int i);
-    virtual int checkAnomaly(const TimeSeries& ts, const correlatedFeatures& corrfea, int i);
+    void setThreshHold(correlatedFeatures& corrfea, Point** pointsArr, int i) override;
+    int checkAnomaly(const TimeSeries& ts, const correlatedFeatures& corrfea, int i) override;
 };
 
 #endif /* HYBRIDANOMALYDETECTOR_H_ */
