@@ -10,7 +10,6 @@ const float highThreshHold = 0.9;
 const float lowThreshHold = 0.5;
 
 HybridAnomalyDetector::HybridAnomalyDetector() {
-	// TODO Auto-generated constructor stub
 
 }
 
@@ -22,7 +21,6 @@ HybridAnomalyDetector::~HybridAnomalyDetector() {
  * Set the threshHold by the farthest point from the center of the circle.
  */
 void HybridAnomalyDetector::setThreshHold(correlatedFeatures& corrfea, Point** pointsArr, int i) {
-    // if (corrfea.corrlation < highThreshHold) {
     corrfea.circle = findMinCircle(pointsArr, i);
     for (int j = 0; j < i; ++j) {
         Point p(pointsArr[j]->x, pointsArr[j]->y);
@@ -42,7 +40,7 @@ int HybridAnomalyDetector::checkAnomaly(const TimeSeries& ts, const correlatedFe
     // Creates point from the values in the data vector (vector[i]->x and vector[i]->y).
     Point p(ts.dataMap.find(corrfea.feature1)->second[i], ts.dataMap.find(corrfea.feature2)->second[i]);
     // If the correlation < 0.9
-    if (corrfea.corrlation < highThreshHold){
+    if (corrfea.corrlation < correlationThreshHold){
         if (distance(corrfea.circle.center, p) > (corrfea.threshold * 1.1))
             return 1;
         else

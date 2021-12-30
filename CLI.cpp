@@ -3,6 +3,7 @@
 //
 
 #include "CLI.h"
+#include <string>
 
 CLI::CLI(DefaultIO* dio) {
     this -> dio = dio;
@@ -15,19 +16,21 @@ CLI::CLI(DefaultIO* dio) {
 }
 
 void CLI::start(){
-    information *information = nullptr;
-    bool shouldContinue = true;
-    while (shouldContinue) {
+    information Information;
+    while (true) {
         dio->write("Welcome to the Anomaly Detection Server.\n");
         dio->write("Please choose an option:\n");
         for (int i = 0; i < 6; i++) {
-            dio->write((string(reinterpret_cast<const char *>(i))) + ".");
+            dio->write((string(to_string(i + 1))) + ".");
             dio->write(allCommands[i]->description + "\n");
         }
         string input = dio->read();
-        int choise = stoi(input) - 1; //because the vector starts from 0
-        if (choise > 0 && choise < 7) {
-            allCommands[choise - 1]->execute(information);
+        int choice = stoi(input) - 1; //because the vector starts from 0
+        if (choice >= 0 && choice < 6) {
+            if(5 == choice) {
+                break;
+            }
+            allCommands[choice]->execute(Information);
         }
     }
 }

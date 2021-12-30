@@ -18,6 +18,8 @@ SimpleAnomalyDetector::~SimpleAnomalyDetector() {
     // TODO Auto-generated destructor stub
 }
 
+void SimpleAnomalyDetector::setCorrelationTheresHold(float th) {correlationThreshHold = th;}
+
 /*
  * Check for correlations between the features according to the input.
  */
@@ -61,7 +63,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts) {
                 // std::abs(pearson(infoArr1, infoArr2, dataSize));
                 corrfea.lin_reg = linear_reg(pointsArr, dataSize);
                 // If (0.5 <= correlation < 0.9) set the threshHold by HybridAnomalyDetector, otherwise continue.
-                if (correlation < 0.9)
+                if (correlation < correlationThreshHold)
                     setThreshHold(corrfea, pointsArr, dataSize);
                 else {
                     // Goes through all the points and set the threshHold by the farthest one

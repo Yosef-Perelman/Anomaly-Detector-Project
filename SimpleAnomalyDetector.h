@@ -28,6 +28,7 @@ class SimpleAnomalyDetector:public TimeSeriesAnomalyDetector{
     vector<correlatedFeatures> cf;
     vector<AnomalyReport> ar;
 public:
+    float correlationThreshHold;
     SimpleAnomalyDetector();
     virtual ~SimpleAnomalyDetector();
 
@@ -38,6 +39,7 @@ public:
         return cf;
     }
 
+    void setCorrelationTheresHold(float th);
     virtual void setThreshHold(correlatedFeatures& corrfea, Point** pointsArr, int i)=0;
     virtual int checkAnomaly(const TimeSeries& ts, const correlatedFeatures& corrfea, int i)=0;
 };
