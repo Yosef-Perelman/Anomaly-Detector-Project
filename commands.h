@@ -1,3 +1,9 @@
+/*
+ * anomaly_detection_util.cpp
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
+
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
 
@@ -6,7 +12,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <iomanip>
+//#include <iomanip>
 #include "HybridAnomalyDetector.h"
 
 using namespace std;
@@ -20,7 +26,7 @@ public:
     virtual ~DefaultIO(){}
 
     // you may add additional methods here
-    void readFile(const string& path){
+    /*void readFile(const string& path){
         std::ifstream infile(path);
         string line;
         string fileText;
@@ -31,7 +37,7 @@ public:
                 infile.close();
             }
         }
-    }
+    }*/
 };
 
 // you may add here helper classes
@@ -197,8 +203,8 @@ public:
         }
         float x = truePositive / float(reports.size());
         float y = falsePositive / float(Information.nonAnomalies);
-        float tpr=((int)(1000.0*x))/1000.0f;
-        float fpr=((int)(1000.0*y))/1000.0f;
+        float tpr= ((int) (x * 1000.0)) / 1000.0f;
+        float fpr= ((int) (y * 1000.0)) / 1000.0f;
         dio->write("True Positive Rate: ");
         dio->write(tpr);
         dio->write("\nFalse Positive Rate: ");

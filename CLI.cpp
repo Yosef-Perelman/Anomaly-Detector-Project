@@ -1,6 +1,8 @@
-//
-// Created by User on 22/12/2021.
-//
+/*
+ * anomaly_detection_util.cpp
+ *
+ * Author: Yosef Perelman 206344814 and Ariel Mantel 313450249
+ */
 
 #include "CLI.h"
 #include <string>
