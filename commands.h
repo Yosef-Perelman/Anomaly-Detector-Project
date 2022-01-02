@@ -12,7 +12,6 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-//#include <iomanip>
 #include "HybridAnomalyDetector.h"
 
 using namespace std;
@@ -40,18 +39,19 @@ public:
     }*/
 };
 
-// you may add here helper classes
+// struct that hold some members for the implementation of the commands
 struct information{
-    float threshold;
-    vector<AnomalyReport> ar;
-    int nonAnomalies;
-    vector<Point> allReports;
+    float threshold; // The minimum number to consider "correlation" between two features
+    vector<AnomalyReport> ar; // vector of anomalies
+    int nonAnomalies; // the number of data lines from the test data that don't made anomaly
+    vector<Point> allReports; // vector of deviation. its look like: '<(73, 76), (102, 105)...>
+
     information(){
         threshold = 0.9;
     }
 };
 
-// you may edit this class
+// Abstract class of command
 class Command{
 protected:
     DefaultIO* dio;
@@ -63,22 +63,26 @@ public:
     virtual ~Command(){}
 };
 
-// implement here your command classes
+
 class UploadCSV:public Command{
 
 public:
     UploadCSV(DefaultIO* dio):Command(dio,"upload a time series csv file"){}
 
-    void execute(information &Information) override{ // removed the 'virtual' and added 'override'
+    // Read the data and create two files from it: "anomalyTrain" and "anomalyTest"
+    void execute(information &Information) override{
         dio->write("Please upload your local train CSV file.\n");
         ofstream anomalyTrain("anomalyTrain.csv");
+        // Read the data and write it into "anomalyTrain" line by line
         string line = dio->read();
         while(line != "done") {
             anomalyTrain << line << "\n";
             line = dio->read();
         }
         dio->write("Upload complete.\n");
+
         dio->write("Please upload your local test CSV file.\n");
+        // Read the data and write it into "anomalyTest" line by line
         ofstream anomalyTest("anomalyTest.csv");
         line = dio->read();
         while(line != "done") {
@@ -94,6 +98,7 @@ class Settings: public Command{
 public:
     Settings(DefaultIO* dio): Command(dio, "algorithm settings"){}
 
+    // Get new correlation threshold between 0 and 1 from the user
     void execute(information &Information) override{
         while (true){
             dio->write("The current correlation threshold is ");
@@ -102,7 +107,7 @@ public:
             dio->write("Type a new threshold\n");
             string input = dio->read();
             float th = stof(input);
-            if (th >= 0 && th <= 1){ // added '='
+            if (th >= 0 && th <= 1){
                 Information.threshold = th;
                 break;
             }
@@ -118,24 +123,33 @@ public:
 
     Detect(DefaultIO* dio): Command(dio, "detect anomalies"){}
 
+    // Learn the data from the train and detect anomalies from the data from the test
     void execute(information &Information) override{
         TimeSeries train("anomalyTrain.csv");
         HybridAnomalyDetector ad;
+        // In the anomaly detector detect anomalies according the correlation threshold that the user choose
         ad.setCorrelationTheresHold(Information.threshold);
         ad.learnNormal(train);
         TimeSeries test("anomalyTest.csv");
         Information.ar = ad.detect(test);
+        // Save the number of lines un the data that don't cause anomaly
         Information.nonAnomalies = test.getLineNum() - Information.ar.size();
         if (!Information.ar.empty()) {
-            string description = Information.ar[0].description;
+            //string description = Information.ar[0].description;
+            // Create vector of deviations. its look like: '<(73, 76), (102, 105)...>
+            // It move over the anomalies vector and check continuity of the report
+            // by the timeSteps. If two reports aren't consecutive saves the deviation
+            // and start to check the new deviation.
             float a = float(Information.ar[0].timeStep);
             for (int i = 1; i < Information.ar.size(); ++i) {
-                if (Information.ar[i].description != description){
-                    description = Information.ar[i].description;
+                if (Information.ar[i].timeStep != (Information.ar[i - 1].timeStep + 1)){
+                    //description = Information.ar[i].description;
                     Information.allReports.push_back({a, float(Information.ar[i - 1].timeStep)});
                     a = float(Information.ar[i].timeStep);
                 }
             }
+            // In the end save the last deviation because in the loop it save deviations only when
+            // a new deviation starts, and after the last deviation no deviation will start.
             Information.allReports.push_back({a, float(Information.ar.back().timeStep)});
         }
         dio->write("anomaly detection complete.\n");
@@ -146,6 +160,8 @@ public:
 class Report: public Command{
 public:
     Report(DefaultIO* dio): Command(dio, "display results"){}
+
+    // Print all the anomalies like: "timeStep-timeStep  description"
     void execute(information &Information) override{
         size_t i = Information.ar.size();
         for (size_t j = 0; j < i; ++j) {
@@ -160,6 +176,7 @@ class UploadAnomalies: public Command{
 public:
     UploadAnomalies(DefaultIO* dio): Command(dio, "upload anomalies and analyze results"){}
 
+    // Helper method that get string "timeStep, timeStep" and save it as Point which means two floats.
     Point splitReport(const string str){
         string word;
         float a, b;
@@ -170,15 +187,18 @@ public:
         return Point(a, b);
     }
 
+    // Compare anomalies report file and the data from the detection earlier
     void execute(information &Information) override{
         dio->write("Please upload your local anomalies file.\n");
-        vector<Point> reports;
+        vector<Point> reports; // Vector of all the reports from the file
         string report = dio->read();
         while (report != "done"){
             reports.push_back(splitReport(report));
             report = dio->read();
         }
         dio->write("Upload complete.\n");
+        // truePositive it's all the reports from the file that feet's (even partly) deviation from the detection.
+        // falsePositive it's all the deviations from the detection that didn't feet any of the reports from the file.
         float truePositive = 0, falsePositive = 0;
         vector<Point>::iterator ptr;
         for (ptr = reports.begin(); ptr < reports.end(); ptr++){
@@ -203,12 +223,14 @@ public:
         }
         float x = truePositive / float(reports.size());
         float y = falsePositive / float(Information.nonAnomalies);
-        float tpr= ((int) (x * 1000.0)) / 1000.0f;
-        float fpr= ((int) (y * 1000.0)) / 1000.0f;
+        // To display the results with max of three digits after the decimal point,
+        // first multiply it by 1000 to move the point three jumps left and convert it to int,
+        // and then divided it by 1000.0 and convert it back to float
+        int a = x * 1000, b = y * 1000;
         dio->write("True Positive Rate: ");
-        dio->write(tpr);
+        dio->write(a / 1000.0);
         dio->write("\nFalse Positive Rate: ");
-        dio->write(fpr);
+        dio->write(b / 1000.0);
         dio->write("\n");
     }
 };
