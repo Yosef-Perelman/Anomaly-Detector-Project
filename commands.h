@@ -107,12 +107,12 @@ public:
             dio->write("Type a new threshold\n");
             string input = dio->read();
             float th = stof(input);
-            if (th >= 0 && th <= 1){
+            if (th > 0 && th <= 1){
                 Information.threshold = th;
                 break;
             }
             else {
-                dio->write("please choose a value between 0 and 1");
+                dio->write("please choose a value between 0 and 1.\n");
             }
         }
     }
@@ -125,6 +125,7 @@ public:
 
     // Learn the data from the train and detect anomalies from the data from the test
     void execute(information &Information) override{
+        Information.allReports.clear();
         TimeSeries train("anomalyTrain.csv");
         HybridAnomalyDetector ad;
         // In the anomaly detector detect anomalies according the correlation threshold that the user choose
