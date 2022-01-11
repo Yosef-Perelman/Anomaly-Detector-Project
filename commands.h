@@ -43,7 +43,7 @@ public:
 struct information{
     float threshold; // The minimum number to consider "correlation" between two features
     vector<AnomalyReport> ar; // vector of anomalies
-    int nonAnomalies; // the number of data lines from the test data that don't made anomaly
+    float nonAnomalies; // the number of data lines from the test data that don't made anomaly
     vector<Point> allReports; // vector of deviation. its look like: '<(73, 76), (102, 105)...>
 
     information(){
@@ -136,7 +136,7 @@ public:
         // Save the number of lines un the data that don't cause anomaly
         Information.nonAnomalies = test.getLineNum() - Information.ar.size();
         if (!Information.ar.empty()) {
-            //string description = Information.ar[0].description;
+            // string description = Information.ar[0].description;
             // Create vector of deviations. its look like: '<(73, 76), (102, 105)...>
             // It move over the anomalies vector and check continuity of the report
             // by the timeSteps. If two reports aren't consecutive saves the deviation
@@ -223,15 +223,15 @@ public:
                 ++falsePositive;
         }
         float x = truePositive / float(reports.size());
-        float y = falsePositive / float(Information.nonAnomalies);
+        float y = falsePositive / Information.nonAnomalies;
+        int a = x * 1000.0f, b = y * 1000.0f;
         // To display the results with max of three digits after the decimal point,
         // first multiply it by 1000 to move the point three jumps left and convert it to int,
         // and then divided it by 1000.0 and convert it back to float
-        int a = x * 1000, b = y * 1000;
         dio->write("True Positive Rate: ");
-        dio->write(a / 1000.0);
+        dio->write(a / 1000.0f);
         dio->write("\nFalse Positive Rate: ");
-        dio->write(b / 1000.0);
+        dio->write(b / 1000.0f);
         dio->write("\n");
     }
 };
